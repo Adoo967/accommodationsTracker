@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>28 Expandable Buttons</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      padding: 18px 30px 0 30px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .download-all-btn, .load-last-btn {
+      padding: 10px 24px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .load-last-btn {
+      background: #43a047;
+    }
+    .last-saved {
+      font-size: 1em;
+      color: #555;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .btn-box {
+      flex: 0 0 calc(20% - 10px);
+      min-width: 120px;
+      min-height: 60px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-box.expanded {
+      flex: 1 1 90vw;
+      min-width: 90vw;
+      min-height: 70vh;
+      max-width: 95vw;
+      max-height: 80vh;
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: block;
+      cursor: default;
+    }
+    .btn-box.shrunk {
+      flex: 0 0 60px;
+      min-width: 60px;
+      min-height: 30px;
+      opacity: 0.5;
+      pointer-events: none;
+      font-size: 0.8em;
+    }
+    .btn-box .main-btn {
+      width: 100%;
+      height: 100%;
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      color: #333;
+      pointer-events: none;
+    }
+    .btn-box .edit-btn-name {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #eee;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9em;
+      padding: 2px 8px;
+      cursor: pointer;
+      color: #333;
+      z-index: 2;
+      display: none;
+    }
+    .btn-box:hover .edit-btn-name {
+      display: block;
+    }
+    .btn-box.expanded .expanded-content {
+      display: block;
+      padding: 30px;
+      text-align: center;
+    }
+    .expanded-content {
+      display: none;
+    }
+    .chart-placeholder {
+      width: 80%;
+      height: 300px;
+      background: #e3e3e3;
+      border-radius: 12px;
+      margin: 30px auto 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      color: #666;
+    }
+    .close-btn, .add-data-btn, .download-btn {
+      margin-top: 20px;
+      padding: 10px 24px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .add-data-btn {
+      background: #43a047;
+      margin-right: 10px;
+    }
+    .download-btn {
+      background: #fbc02d;
+      color: #333;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    /* Modal styles */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.3);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #modal .modal-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      min-width: 250px;
+      max-width: 90vw;
+      box-sizing: border-box;
+    }
+    #modal select {
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .container, .top-bar {
+        max-width: 100vw;
+      }
+      .btn-box {
+        flex: 0 0 calc(33.33% - 10px);
+      }
+    }
+    @media (max-width: 600px) {
+      .btn-box {
+        flex: 0 0 calc(50% - 10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar" id="topBar">
+    <button class="download-all-btn" id="downloadAllBtn">Download All &amp; Save</button>
+    <button class="load-last-btn" id="loadLastBtn">Load from last save</button>
+    <span class="last-saved" id="lastSavedText">Last saved: never</span>
+  </div>
+  <div class="container" id="buttonsContainer">
+    <!-- Buttons will be injected here -->
+  </div>
+
+  <!-- Modal for Add Data -->
+  <div id="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Select Options and Date</h3>
+      <select id="mySelect" multiple size="5">
+        <option value="apple">Apple</option>
+        <option value="banana">Banana</option>
+        <option value="orange">Orange</option>
+        <option value="grape">Grape</option>
+        <option value="pear">Pear</option>
+      </select>
+      <div style="margin:16px 0;">
+        <label for="dateInput">Date:</label>
+        <input type="date" id="dateInput" style="margin-left:8px;">
+      </div>
+      <div>
+        <button id="modalOkBtn">OK</button>
+        <button onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let buttonNames = Array.from({length: 28}, (_, i) => `Button ${i+1}`);
+    // Load button names from localStorage if available
+    buttonNames = JSON.parse(localStorage.getItem('StudentNames')) 
+      || Array.from({length: 28}, (_, i) => `Button ${i+1}`);
+
+    // Download All & Save logic
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const lastSavedText = document.getElementById('lastSavedText');
+    const loadLastBtn = document.getElementById('loadLastBtn');
+    downloadAllBtn.onclick = function() {
+      const now = new Date();
+      const formatted = now.toLocaleString();
+      lastSavedText.textContent = 'Last saved: ' + formatted;
+      alert('All data downloaded and saved!');
+    };
+    loadLastBtn.onclick = function() {
+      alert('Loaded from last save!');
+    };
+
+    const container = document.getElementById('buttonsContainer');
+    let currentButtonName = '';
+    let currentButtonIndex = -1;
+
+    for(let i=0; i<28; i++) {
+      const btnBox = document.createElement('div');
+      btnBox.className = 'btn-box';
+      btnBox.innerHTML = `
+        <button class="main-btn">${buttonNames[i]}</button>
+        <button class="edit-btn-name" title="Edit name">&#9998;</button>
+        <div class="expanded-content">
+          <button class="add-data-btn">Add Data</button>
+          <div class="chart-placeholder">[ Chart goes here ]</div>
+          <button class="close-btn">Close</button>
+          <button class="download-btn">Download</button>
+        </div>
+      `;
+      container.appendChild(btnBox);
+
+      const mainBtn = btnBox.querySelector('.main-btn');
+      const editBtn = btnBox.querySelector('.edit-btn-name');
+
+      // Edit button name logic
+      editBtn.onclick = function(e) {
+        e.stopPropagation();
+        const newName = prompt('Enter new name for this button:', mainBtn.textContent);
+        if (newName && newName.trim()) {
+          buttonNames[i] = newName.trim();
+          mainBtn.textContent = buttonNames[i];
+        }
+        localStorage.setItem('StudentNames', JSON.stringify(buttonNames));
+      };
+
+      // Expand logic
+      btnBox.onclick = function(e) {
+        // Prevent close, add-data, download, and edit buttons from triggering expand
+        if (
+          e.target.classList.contains('close-btn') ||
+          e.target.classList.contains('add-data-btn') ||
+          e.target.classList.contains('download-btn') ||
+          e.target.classList.contains('edit-btn-name')
+        ) return;
+        document.querySelectorAll('.btn-box').forEach(box => {
+          box.classList.remove('expanded');
+          box.classList.add('shrunk');
+        });
+        btnBox.classList.add('expanded');
+        btnBox.classList.remove('shrunk');
+        document.getElementById('topBar').style.display = 'none';
+        // Show the name of the button in console or use as needed
+        console.log('Opened:', buttonNames[i]);
+      };
+
+      // Close logic
+      btnBox.querySelector('.close-btn').onclick = function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.btn-box').forEach(box => {
+          box.classList.remove('expanded');
+          box.classList.remove('shrunk');
+        });
+        document.getElementById('topBar').style.display = 'flex';
+      };
+
+      // Add Data button logic (show popup modal)
+      btnBox.querySelector('.add-data-btn').onclick = function(e) {
+        e.stopPropagation();
+        openModal(buttonNames[i], i);
+      };
+
+      // Download button logic (placeholder)
+      btnBox.querySelector('.download-btn').onclick = function(e) {
+        e.stopPropagation();
+        alert('Download for: ' + buttonNames[i]);
+      };
+    }
+
+    // Modal logic
+    function openModal(buttonName, buttonIndex) {
+      currentButtonName = buttonName;
+      currentButtonIndex = buttonIndex;
+      document.getElementById('modalTitle').textContent = `Add Data for: ${buttonName}`;
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('mySelect').selectedIndex = -1;
+      document.getElementById('dateInput').value = '';
+    }
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+    document.getElementById('modalOkBtn').onclick = function() {
+      const select = document.getElementById('mySelect');
+      const selected = Array.from(select.selectedOptions).map(option => option.value);
+      const date = document.getElementById('dateInput').value;
+      alert('Button: ' + currentButtonName + '\nSelected: ' + selected.join(', ') + '\nDate: ' + date);
+      if(localStorage.getItem(currentButtonName)) {
+        const existingData = JSON.parse(localStorage.getItem(currentButtonName));
+        existingData.push({ date, selected });
+        localStorage.setItem(currentButtonName, JSON.stringify(existingData));
+      } else {
+        localStorage.setItem(currentButtonName, JSON.stringify([{ date, selected }]));
+      }
+      closeModal();
+    };
+  </script>
+</body>
+</html>
