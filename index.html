@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>28 Expandable Buttons</title>
+  <title>Accommodations Tracker</title>
   <style>
     body {
       margin: 0;
@@ -200,11 +200,37 @@
     <div class="modal-content">
       <h3 id="modalTitle">Select Options and Date</h3>
       <select id="mySelect" multiple size="5">
-        <option value="apple">Apple</option>
-        <option value="banana">Banana</option>
-        <option value="orange">Orange</option>
-        <option value="grape">Grape</option>
-        <option value="pear">Pear</option>
+        <option value="Small Group">Small Group</option>
+        <option value="L.Lab">L.Lab</option>
+        <option value="Extra time">Extra Time</option>
+        <option value="Check For Understanding">Check For Understanding</option>
+        <option value="Chunking">Chunking</option>
+        <option value="Oral Accommodations">Oral Accommodations</option>
+        <option value="Seat Preference">Seat Preference</option>
+        <option value="Reminder to stay on task">Reminder to stay on task</option>
+        <option value="Access to a counselor">Access to a counselor</option>
+        <option value="Access to Nurse">Access to Nurse</option>
+         <option value="Snacks/water">Snacks/water</option>
+        <option value="Access to the restroom">Access to the restroom</option>
+        <option value="Spell Assisstance">Spell Assisstance</option>
+        <option value="Graphic Organizer">Graphic Organizer</option>
+        <option value="Copy of Notes">Copy of Notes</option>
+        <option value="Breaks/cools down">Breaks/cools down</option>
+        <option value="Positive Feedback">Positive Feedback</option>
+        <option value="Modified assessments">Modified assessments</option>
+        <option value="Reduced work/assessments">Reduced work/assessments</option>
+        <option value="Positive Reinforcement">Positive Reinforcement</option>
+        <option value="access to a quiet place">access to a quiet place</option>
+        <option value="Immediate feedback">Immediate feedback</option>
+        <option value="Frequent breaks">Frequent breaks</option>
+        <option value="Note-taking assistance">Note-taking assistance</option>
+        <option value="BIP">BIP</option>
+        <option value="head phone">Headphone</option>
+        <option value="Frequent breaks">Frequent breaks</option>
+        <option value="Reminder to stay on task">Reminder to stay on task</option>
+        <option value="Read aloud">Read aloud</option>
+        <option value="Scaffolding">Scaffolding</option>
+        <option value="Shortening Test">Shortening Test</option>
       </select>
       <div style="margin:16px 0;">
         <label for="dateInput">Date:</label>
@@ -216,12 +242,13 @@
       </div>
     </div>
   </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <script>
-    let buttonNames = Array.from({length: 28}, (_, i) => `Button ${i+1}`);
+    let buttonNames = Array.from({length: 40}, (_, i) => `Button ${i+1}`);
     // Load button names from localStorage if available
     buttonNames = JSON.parse(localStorage.getItem('StudentNames')) 
-      || Array.from({length: 28}, (_, i) => `Button ${i+1}`);
+      || Array.from({length: 40}, (_, i) => `Button ${i+1}`);
 
     // Download All & Save logic
     const downloadAllBtn = document.getElementById('downloadAllBtn');
@@ -241,7 +268,7 @@
     let currentButtonName = '';
     let currentButtonIndex = -1;
 
-    for(let i=0; i<28; i++) {
+    for(let i=0; i<40; i++) {
       const btnBox = document.createElement('div');
       btnBox.className = 'btn-box';
       btnBox.innerHTML = `
@@ -272,6 +299,7 @@
 
       // Expand logic
       btnBox.onclick = function(e) {
+      
         // Prevent close, add-data, download, and edit buttons from triggering expand
         if (
           e.target.classList.contains('close-btn') ||
@@ -288,6 +316,7 @@
         document.getElementById('topBar').style.display = 'none';
         // Show the name of the button in console or use as needed
         console.log('Opened:', buttonNames[i]);
+        renderTable(btnBox, buttonNames[i]);
       };
 
       // Close logic
@@ -310,7 +339,34 @@
       btnBox.querySelector('.download-btn').onclick = function(e) {
         e.stopPropagation();
         alert('Download for: ' + buttonNames[i]);
+        downloadTable(btnBox, buttonNames[i]);
       };
+    }
+    function downloadTable(btnBox, buttonName) {
+        const table = btnBox.querySelector('.table');
+        if (!table) {
+          alert('No data available to download for ' + buttonNames[i]);
+          return;
+        }
+        const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
+        headers.pop(); // Remove "Remove" header
+        const rows = Array.from(table.querySelectorAll('tr')).slice(1).map(tr => {
+          return Array.from(tr.querySelectorAll('td')).map(td => td.textContent);
+
+        }); 
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        console.log(headers);
+        console.log("here");
+        console.log(rows);
+        doc.text('Accommodations Report for ' + buttonName, 10, 10);
+        doc.autoTable({
+          head: [headers],
+          body: rows.map(row => row.slice(0, -1)), // Exclude "Remove" column
+        });
+        console.log('Downloading data for:', buttonName);
+        doc.save(buttonName + '-AccommadationsReport.pdf');
+
     }
 
     // Modal logic
@@ -338,7 +394,43 @@
         localStorage.setItem(currentButtonName, JSON.stringify([{ date, selected }]));
       }
       closeModal();
+
+      // Refresh table if expanded
+      const btnBoxes = document.querySelectorAll('.btn-box');
+      const expandedBox = btnBoxes[currentButtonIndex];
+      if (expandedBox && expandedBox.classList.contains('expanded')) {
+        renderTable(expandedBox, currentButtonName);
+      }
     };
+    function renderTable(btnBox, buttonName) {
+  const chartPlaceholder = btnBox.querySelector('.chart-placeholder');
+  const data = JSON.parse(localStorage.getItem(buttonName));
+  if (!data || data.length === 0) {
+    chartPlaceholder.innerHTML = 'No data available for this button.';
+    return;
+  }
+  let tableHTML = '<table border="1" style="width:100%" class="table"><tr><th>Date</th><th>Accommodations</th><th>Remove</th></tr>';
+  data.forEach((item, idx) => {
+    tableHTML += `<tr>
+      <td>${item.date}</td>
+      <td>${item.selected.join(', ')}</td>
+      <td><button class="remove" data-idx="${idx}">Remove</button></td>
+    </tr>`;
+  });
+  tableHTML += '</table>';
+  chartPlaceholder.innerHTML = tableHTML;
+
+  // Add remove button handlers
+  chartPlaceholder.querySelectorAll('.remove').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      data.splice(idx, 1);
+      localStorage.setItem(buttonName, JSON.stringify(data));
+      renderTable(btnBox, buttonName); // Refresh table
+    };
+  });
+}
   </script>
 </body>
 </html>
