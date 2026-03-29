@@ -29,4 +29,4 @@ This is a simple web-based accommodations tracker. You can use it to track, save
 ## Need Help or Custom Features?
 
 If you need help using the tracker, or if you want a version tailored to your specific needs (for example, with certain accommodations or custom features), feel free to reach out!  
-**Contact me through GitHub Issues or by email** Aryan.sanojraj@gmail.com. I’m happy to help or make adjustments for your use case.
+**Contact me through GitHub Issues or by email** adishar789@gmail.com. I’m happy to help or make adjustments for your use case.
